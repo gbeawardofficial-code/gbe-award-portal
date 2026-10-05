@@ -64,7 +64,7 @@ The public form is deliberately short and guided:
 3. **Payment**: secure Genie card checkout (when enabled), or bank transfer with one payment-proof file. Card payments never require a slip.
 4. **Confirm** — declaration review, Turnstile verification and submission.
 
-When the award cycle is closed in **System → Award cycles**, `/apply` replaces the form and any offer banner with a short nominations-closed notice and winner congratulations. The server also rejects new nominations for a cycle that is no longer open.
+When the award cycle is closed in **System → Award cycles**, `/apply` shows a fixed red ribbon, winner congratulations and contact details. The form, Turnstile, brochure, programme details and recognition carousel are not rendered, including during loading. Ticket sales and staff check-in remain independent. The server also rejects new nominations for a cycle that is no longer open.
 
 Supporting documents and payment proof are independently limited to **5 MB per file**. The browser gives upload progress, cancellation and retry feedback; the server repeats validation before accepting a completion request.
 

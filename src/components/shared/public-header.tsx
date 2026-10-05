@@ -5,14 +5,18 @@ import { AppLogo } from "@/components/brand/app-logo";
 type PublicHeaderProps = {
   compactSignIn?: boolean;
   hideSignIn?: boolean;
+  belowRibbon?: boolean;
 };
 
 export function PublicHeader({
   compactSignIn = false,
   hideSignIn = false,
+  belowRibbon = false,
 }: PublicHeaderProps) {
   return (
-    <header className="glass-shell sticky top-0 z-40">
+    <header
+      className={`glass-shell sticky z-40 ${belowRibbon ? "top-12" : "top-0"}`}
+    >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-10">
         <AppLogo />
         <nav

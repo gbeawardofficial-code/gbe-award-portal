@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Mail } from "lucide-react";
 import { PublicHeader } from "@/components/shared/public-header";
 import { PublicFooter } from "@/components/shared/public-footer";
+import { NominationsClosed } from "@/components/shared/nominations-closed";
 import { NominationForm } from "@/components/forms/nomination-form";
 import { ProgrammeDetailsButton } from "@/components/programme/programme-details-button";
 import { RecognitionMarquee } from "@/components/recognition/recognition-marquee";
@@ -55,10 +56,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function ApplyPage() {
-  const [{ categories, cycle, unavailable, pricing }, paymentInstructions] =
-    await Promise.all([getPublicNomination(), getPublicPaymentInstructions()]);
+  const { categories, cycle, unavailable, pricing } =
+    await getPublicNomination();
   const supportEmail = cycle?.supportEmail ?? "info@gbeaward.com";
   const year = cycle?.year ?? 2026;
+  if (unavailable)
+    return <NominationsClosed year={year} supportEmail={supportEmail} />;
+  const paymentInstructions = await getPublicPaymentInstructions();
   const pricingCycle = {
     year,
     nominationFeeMinor: cycle?.nominationFeeMinor ?? null,
@@ -122,13 +126,13 @@ export default async function ApplyPage() {
                 <h1 className="page-heading max-w-2xl">
                   {unavailable
                     ? `Thank you for celebrating achievement`
-                    : cycle?.heading ?? "GBE Awards Public Nomination"}
+                    : (cycle?.heading ?? "GBE Awards Public Nomination")}
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-graphite">
                   {unavailable
                     ? `Congratulations to everyone who helped celebrate outstanding achievement in ${year}.`
-                    : cycle?.introCopy ??
-                      "The nomination window is currently unavailable. Please contact the GBE Awards team for guidance."}
+                    : (cycle?.introCopy ??
+                      "The nomination window is currently unavailable. Please contact the GBE Awards team for guidance.")}
                 </p>
                 <a
                   className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm text-antique-gold underline-offset-4 hover:underline"

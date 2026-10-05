@@ -148,6 +148,7 @@ bun run db:bootstrap-admin
 - Admin list pagination uses `TablePagination` or the server-side `OffsetPagination` wrapper. Show the visible record range, matching total and current/total pages; preserve filters, handle stale pages and prevent duplicate pending navigation. Keep cursor pagination for Applications. Use `AdminPageHeader` for standard admin section headings and hide desktop-only table structure for empty results.
 - Keep the interface clear, minimal and touch-friendly. Test compact navigation, forms, tables, bulk actions and pagination on phone and tablet widths; desktop layouts must not force horizontal page overflow.
 - Match each route’s loading boundary to its actual layout. Do not replace tailored skeletons with a generic unrelated placeholder.
+- A closed `/apply` page and its loading boundary reuse `NominationsClosed`. Do not render disabled nomination fields, Turnstile or programme buttons underneath the fixed closure ribbon. Closing nominations must not disable guest tickets or staff check-in.
 - Preserve semantic labels, keyboard flow, visible focus, error summaries, skip link, sufficient touch targets and `aria-*` relationships. For public-flow changes, use the existing Axe/Playwright coverage as a baseline.
 - Protected applicant/admin pages must retain `noindex`; public metadata and artwork belong in the root/public layouts only.
 
