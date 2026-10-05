@@ -156,10 +156,11 @@ export async function GET(request: Request) {
     "Email",
     "Telephone",
     "Category",
+    "Record origin",
     "Workflow status",
     "Payment status",
     "Account access",
-    "Submitted (Asia/Colombo)",
+    "Submitted / recorded (Asia/Colombo)",
     "Last activity (Asia/Colombo)",
   ];
   const values = rows.map((row) =>
@@ -172,6 +173,7 @@ export async function GET(request: Request) {
       row.emailDisplay,
       row.phoneDisplay,
       row.categoryNameSnapshot,
+      row.recordOrigin === "staff_winner" ? "Staff-recorded winner" : "Public nomination",
       row.workflowStatus,
       row.paymentStatus,
       row.accountAccessStatus,

@@ -94,11 +94,13 @@ describe("bulk action dialogs", () => {
           {
             ...row,
             designation: null,
+            recordOrigin: "public_nomination",
             categoryNameSnapshot: "Business",
             awardNomination: "Test nomination",
             emailDisplay: "test@example.test",
             phoneDisplay: "+94 77 123 4567",
             submittedLabel: "18 Sep 2026",
+            recordDateLabel: "Submitted",
             reviewerName: "Staff",
             updatedLabel: "18 Sep 2026",
           },

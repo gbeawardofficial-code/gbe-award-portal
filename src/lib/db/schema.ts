@@ -322,6 +322,11 @@ export const applications = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     reference: text("reference").unique(),
+    recordOrigin: text("record_origin", {
+      enum: ["public_nomination", "staff_winner"],
+    })
+      .notNull()
+      .default("public_nomination"),
     cycleId: uuid("cycle_id")
       .notNull()
       .references(() => awardCycles.id),
@@ -369,6 +374,13 @@ export const applications = pgTable(
     ...timestamps,
   },
   (t) => [
+    check(
+      "applications_record_origin_valid",
+      sql`${t.recordOrigin} in ('public_nomination', 'staff_winner')`,
+    ),
+    uniqueIndex("applications_staff_winner_dedup_idx")
+      .on(t.cycleId, t.categoryId, t.emailNormalised, t.awardNomination)
+      .where(sql`${t.recordOrigin} = 'staff_winner'`),
     index("applications_cycle_status_submitted_idx").on(
       t.cycleId,
       t.workflowStatus,
@@ -679,6 +691,11 @@ export const auditLogs = pgTable(
   (t) => [
     index("audit_entity_created_idx").on(t.entityType, t.entityId, t.createdAt),
     index("audit_application_created_idx").on(t.applicationId, t.createdAt),
+    uniqueIndex("audit_manual_winner_request_uidx")
+      .on(t.requestId)
+      .where(
+        sql`${t.action} = 'staff_winner_entry_created' and ${t.requestId} is not null`,
+      ),
   ],
 );
 export const emailOutbox = pgTable(

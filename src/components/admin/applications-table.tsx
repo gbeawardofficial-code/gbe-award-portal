@@ -31,6 +31,7 @@ import {
 export type ApplicationTableRow = BulkSelection & {
   id: string;
   reference: string | null;
+  recordOrigin: "public_nomination" | "staff_winner";
   nomineeName: string;
   designation: string | null;
   categoryNameSnapshot: string;
@@ -39,6 +40,7 @@ export type ApplicationTableRow = BulkSelection & {
   phoneDisplay: string;
   paymentStatus: string;
   submittedLabel: string;
+  recordDateLabel: string;
   reviewerName: string;
   updatedLabel: string;
 };
@@ -107,6 +109,9 @@ export function ApplicationsTable({
               <p className="max-w-64 truncate text-xs text-muted-foreground">
                 {row.original.designation}
               </p>
+            ) : null}
+            {row.original.recordOrigin === "staff_winner" ? (
+              <p className="mt-1 text-xs text-muted-foreground">Staff entry</p>
             ) : null}
           </div>
         ),
@@ -185,12 +190,17 @@ export function ApplicationsTable({
       },
       {
         id: "submitted",
-        header: "Submitted",
+        header: "Submitted / recorded",
         cell: ({ row }) => (
           <div className="min-w-0 py-1 text-xs">
-            <p className="text-foreground">{row.original.submittedLabel}</p>
+            <p className="text-foreground">
+              <span className="sr-only">{row.original.recordDateLabel}: </span>
+              {row.original.submittedLabel}
+            </p>
             <p className="mt-1 truncate text-muted-foreground">
-              {row.original.reviewerName === "Unassigned"
+              {row.original.recordOrigin === "staff_winner"
+                ? "Staff-recorded winner"
+                : row.original.reviewerName === "Unassigned"
                 ? "Unassigned"
                 : `Reviewer: ${row.original.reviewerName}`}
             </p>
@@ -357,6 +367,11 @@ export function ApplicationsTable({
                   >
                     {row.original.nomineeName}
                   </Link>
+                  {row.original.recordOrigin === "staff_winner" ? (
+                    <span className="mt-1 inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                      Staff entry
+                    </span>
+                  ) : null}
                   <p className="mt-1 text-xs font-medium text-muted-foreground [overflow-wrap:anywhere]">
                     {row.original.categoryNameSnapshot}
                   </p>
@@ -382,10 +397,10 @@ export function ApplicationsTable({
               <div className="mt-3 flex flex-wrap items-center gap-2 pl-7">
                 <StatusBadge status={row.original.workflowStatus} />
                 <StatusBadge status={row.original.paymentStatus} />
-                <span className="min-w-0 text-xs text-muted-foreground [overflow-wrap:anywhere]">
-                  {row.original.reviewerName}
-                </span>
               </div>
+              <p className="mt-2 pl-7 text-xs text-muted-foreground">
+                {row.original.recordDateLabel}: {row.original.submittedLabel}
+              </p>
             </article>
           ))
         ) : (

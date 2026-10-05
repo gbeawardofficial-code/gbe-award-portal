@@ -81,8 +81,23 @@ export function NominationPricingProvider({
   );
 }
 
-export function NominationOfferBanner() {
+export function NominationOfferBanner({
+  closed = false,
+  year = 2026,
+}: {
+  closed?: boolean;
+  year?: number;
+}) {
   const { pricing } = useNominationPricing();
+  if (closed)
+    return (
+      <aside
+        aria-label="Nominations closed"
+        className="bg-[#b42332] px-4 py-3 text-center text-sm font-semibold leading-6 text-white"
+      >
+        Nominations are now closed. Congratulations to our {year} winners.
+      </aside>
+    );
   if (
     pricing.phase !== "active" ||
     !pricing.endsAt ||

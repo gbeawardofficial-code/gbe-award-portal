@@ -64,6 +64,8 @@ The public form is deliberately short and guided:
 3. **Payment**: secure Genie card checkout (when enabled), or bank transfer with one payment-proof file. Card payments never require a slip.
 4. **Confirm** — declaration review, Turnstile verification and submission.
 
+When the award cycle is closed in **System → Award cycles**, `/apply` replaces the form and any offer banner with a short nominations-closed notice and winner congratulations. The server also rejects new nominations for a cycle that is no longer open.
+
 Supporting documents and payment proof are independently limited to **5 MB per file**. The browser gives upload progress, cancellation and retry feedback; the server repeats validation before accepting a completion request.
 
 Normal dashboards, review queues, applicant views and nomination exports exclude soft-deleted nominations. Submitted totals and summaries also exclude unfinished upload shells and unpaid card checkouts. The explicit **Deleted** application view and its exports retain recovery access; audit and delivery history remain available. Deleting or restoring a nomination refreshes the linked admin and applicant workspaces.
@@ -162,6 +164,8 @@ For rollback, close sales first, retain booking/payment/ticket records and resto
 - **Programme media** on `/apply` is an on-demand dialog: the Facebook post/reel frames and their client bundle load only after a visitor requests them. The adjacent event-brochure action is a verified direct Google Drive download. No Facebook SDK is loaded into the nomination page; the restrictive policy permits Facebook only as a frame source for this dialog.
 - **Recognition strip** on `/apply` uses locally versioned LBC, DEC and SITC artwork with the relevant UK and Sri Lankan flags. The below-form strip is server-rendered, CSS-only, pauses on interaction and becomes a manually scrollable row when reduced motion is preferred.
 - **Sensitive operations** write audit events. A super admin may remove only an empty, unfinished nomination shell; the operation refuses submitted nominations or retained evidence, removes staged private uploads and mutable operational records, then soft-deletes the shell. Its immutable audit trail is retained. Administrative data is noindexed, and platform headers block framing and apply a restrictive content policy.
+- **Staff-recorded winners** can be added from the Applications page only by a super admin after a cycle's results release date. These records are explicitly marked as staff entries, have a zero-value waived payment and internal receipt reference, and do not create an applicant declaration, account, proof file or email notification. The public nomination cycle is not opened by this operation.
+- This workflow requires the additive `drizzle/migrations/0017_glorious_jigsaw.sql` migration before deployment. Review and apply it to the intended database using the normal backup and migration-owner procedure; it does not backfill or rewrite existing nominations.
 - **Database roles are split:** the runtime uses the least-privilege pooled connection; migrations use a separate direct owner connection.
 
 ## 🗺️ Repository map

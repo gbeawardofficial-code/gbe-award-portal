@@ -1,0 +1,4 @@
+ALTER TABLE "applications" ADD COLUMN "record_origin" text DEFAULT 'public_nomination' NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "applications_staff_winner_dedup_idx" ON "applications" USING btree ("cycle_id","category_id","email_normalised","award_nomination") WHERE "applications"."record_origin" = 'staff_winner';--> statement-breakpoint
+CREATE UNIQUE INDEX "audit_manual_winner_request_uidx" ON "audit_logs" USING btree ("request_id") WHERE "audit_logs"."action" = 'staff_winner_entry_created' and "audit_logs"."request_id" is not null;--> statement-breakpoint
+ALTER TABLE "applications" ADD CONSTRAINT "applications_record_origin_valid" CHECK ("applications"."record_origin" in ('public_nomination', 'staff_winner'));

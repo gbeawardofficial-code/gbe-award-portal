@@ -188,7 +188,11 @@ export default async function AdminApplicationDetail({
     ["Telephone", application.phoneDisplay],
     ["Category", application.categoryNameSnapshot],
     [
-      application.checkoutPending ? "Saved" : "Submitted",
+      application.checkoutPending
+        ? "Saved"
+        : application.recordOrigin === "staff_winner"
+          ? "Recorded by staff"
+          : "Submitted",
       application.submittedAt
         ? formatInTimeZone(
             application.submittedAt,
@@ -262,6 +266,12 @@ export default async function AdminApplicationDetail({
             ) : null}
           </div>
         </div>
+        {application.recordOrigin === "staff_winner" ? (
+          <p className="mt-4 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+            Staff-recorded winner. No applicant declaration or account was
+            created.
+          </p>
+        ) : null}
       </header>
       <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex min-w-0 flex-col gap-6">
@@ -291,6 +301,7 @@ export default async function AdminApplicationDetail({
               ))}
             </dl>
           </section>
+          {application.recordOrigin !== "staff_winner" ? (
           <details className="surface group rounded-lg">
             <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
               <div>
@@ -367,6 +378,8 @@ export default async function AdminApplicationDetail({
               </table>
             </div>
           </details>
+          ) : null}
+          {application.recordOrigin !== "staff_winner" ? (
           <details className="surface group rounded-xl">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
               <span>Applicant access</span>
@@ -438,6 +451,7 @@ export default async function AdminApplicationDetail({
               ) : null}
             </div>
           </details>
+          ) : null}
           <section className="surface rounded-lg p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="section-title">Documents</h2>

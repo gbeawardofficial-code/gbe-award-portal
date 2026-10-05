@@ -38,6 +38,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { hasPermission, requireStaff } from "@/server/dal/auth";
 import { ApplicationsTable } from "@/components/admin/applications-table";
 import { DebouncedApplicationSearch } from "@/components/admin/debounced-application-search";
+import { ManualWinnerDialog } from "@/components/admin/manual-winner-dialog";
 function encodeCursor(value: { key: string; id: string }) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
 }
@@ -242,7 +243,11 @@ export default async function ApplicationsPage({
       .limit(pageSize + 1),
     db.select({ value: count() }).from(applications).where(countWhere),
     db
-      .select({ id: awardCategories.id, name: awardCategories.name })
+      .select({
+        id: awardCategories.id,
+        cycleId: awardCategories.cycleId,
+        name: awardCategories.name,
+      })
       .from(awardCategories)
       .where(eq(awardCategories.isActive, true))
       .orderBy(asc(awardCategories.displayOrder)),
@@ -258,7 +263,13 @@ export default async function ApplicationsPage({
       .where(eq(profiles.accountKind, "staff"))
       .orderBy(asc(profiles.displayName)),
     db
-      .select({ id: awardCycles.id, name: awardCycles.name })
+      .select({
+        id: awardCycles.id,
+        name: awardCycles.name,
+        status: awardCycles.status,
+        resultsReleaseAt: awardCycles.resultsReleaseAt,
+        currency: awardCycles.currency,
+      })
       .from(awardCycles)
       .orderBy(desc(awardCycles.year)),
   ]);
@@ -266,6 +277,17 @@ export default async function ApplicationsPage({
   const rows = result.slice(0, pageSize);
   if (!rows.length && cursorHistory.length) redirect(cursorHref([]));
   const last = rows.at(-1);
+  const now = new Date();
+  const winnerCycles = cycles
+    .filter(
+      (cycle) =>
+        !["draft", "scheduled", "open"].includes(cycle.status) &&
+        !!cycle.resultsReleaseAt &&
+        cycle.resultsReleaseAt <= now &&
+        !!cycle.currency &&
+        categories.some((category) => category.cycleId === cycle.id),
+    )
+    .map(({ id, name }) => ({ id, name }));
   const nextCursor =
     hasMore && last
       ? encodeCursor({
@@ -333,13 +355,25 @@ export default async function ApplicationsPage({
             {total.value} nominations
           </p>
         </div>
-        <Button
-          variant="outline"
-          render={<a href={`/api/admin/exports/applications?${exportQuery}`} />}
-        >
-          <Download data-icon="inline-start" />
-          Export current view
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {membership.role === "super_admin" &&
+          winnerCycles.length > 0 &&
+          hasPermission(membership, "applications.release_outcome") &&
+          hasPermission(membership, "payments.verify") ? (
+            <ManualWinnerDialog
+              cycles={winnerCycles}
+              categories={categories}
+              preferredCycleId={activeCycleFilter}
+            />
+          ) : null}
+          <Button
+            variant="outline"
+            render={<a href={`/api/admin/exports/applications?${exportQuery}`} />}
+          >
+            <Download data-icon="inline-start" />
+            Export current view
+          </Button>
+        </div>
       </div>
       <form className="surface mb-5 rounded-xl p-3 sm:p-4">
         <div className="flex flex-wrap gap-3">
@@ -550,6 +584,7 @@ export default async function ApplicationsPage({
             updatedAt: row.updatedAt.toISOString(),
             deleted: !!row.deletedAt,
             reference: row.reference,
+            recordOrigin: row.recordOrigin,
             nomineeName: row.nomineeName,
             designation: row.designation,
             categoryNameSnapshot: row.categoryNameSnapshot,
@@ -565,10 +600,14 @@ export default async function ApplicationsPage({
                   "dd MMM yyyy, HH:mm",
                 )
               : "Uploading",
+            recordDateLabel:
+              row.recordOrigin === "staff_winner" ? "Recorded by staff" : "Submitted",
             reviewerName:
-              reviewers.find(
-                (reviewer) => reviewer.id === row.assignedReviewerId,
-              )?.name ?? "Unassigned",
+              row.recordOrigin === "staff_winner"
+                ? "Staff-recorded winner"
+                : reviewers.find(
+                      (reviewer) => reviewer.id === row.assignedReviewerId,
+                    )?.name ?? "Unassigned",
             updatedLabel: formatInTimeZone(
               row.lastActivityAt,
               "Asia/Colombo",

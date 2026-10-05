@@ -294,13 +294,22 @@ export function MessagesPageSkeleton() {
 
 export function PublicNominationSkeleton({
   offerActive = false,
+  closed = false,
 }: {
   offerActive?: boolean;
+  closed?: boolean;
 }) {
   return (
     <div className="flex min-h-svh flex-col">
       <PublicHeader compactSignIn />
-      {offerActive ? (
+      {closed ? (
+        <aside
+          aria-label="Nominations closed"
+          className="bg-[#b42332] px-4 py-3 text-center text-sm font-semibold leading-6 text-white"
+        >
+          Nominations are now closed. Congratulations to our 2026 winners.
+        </aside>
+      ) : offerActive ? (
         <div
           aria-hidden
           className="flex h-24 flex-col items-center justify-center gap-2 bg-[#b42332] px-4 sm:h-16 sm:flex-row sm:gap-6"
@@ -314,13 +323,22 @@ export function PublicNominationSkeleton({
           className="mx-auto max-w-[900px] px-5 pb-10 pt-12 md:pb-16 md:pt-18"
           aria-busy
         >
-          <LoadingStatus label="Loading nomination form" />
+          <LoadingStatus
+            label={closed ? "Loading closed nominations page" : "Loading nomination form"}
+          />
           <div className="mb-9 border-b border-mist pb-9">
             <Skeleton className="h-3 w-32" />
             <Skeleton className="mt-4 h-10 w-3/4" />
             <Skeleton className="mt-5 h-5 w-full" />
             <Skeleton className="mt-2 h-5 w-2/3" />
           </div>
+          {closed ? (
+            <div className="surface rounded-lg p-6 md:p-8">
+              <Skeleton className="h-7 w-52 max-w-full" />
+              <Skeleton className="mt-4 h-5 w-full max-w-2xl" />
+              <Skeleton className="mt-2 h-5 w-2/3 max-w-xl" />
+            </div>
+          ) : (
           <section className="surface overflow-hidden rounded-lg">
             <div className="border-b border-mist px-5 py-5 md:px-8">
               <Skeleton className="h-3 w-28" />
@@ -341,6 +359,7 @@ export function PublicNominationSkeleton({
               <Skeleton className="ml-auto mt-8 h-11 w-28" />
             </div>
           </section>
+          )}
           <section className="mt-14 border-t border-mist pt-10 md:mt-16 md:pt-12">
             <Skeleton className="h-8 w-72 max-w-full" />
             <div className="mt-7 flex gap-4 overflow-hidden">

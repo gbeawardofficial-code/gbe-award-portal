@@ -90,7 +90,8 @@ describe("ticket action loading feedback", () => {
     fireEvent.click(issueButton);
     expect(mocks.issue).toHaveBeenCalledTimes(1);
     await act(async () => issue.resolve({ ok: true, id: "booking-fixture" }));
-    expect(mocks.push).toHaveBeenCalledWith("/admin/tickets/booking-fixture");
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    expect(mocks.push).not.toHaveBeenCalled();
   });
 
   it("clears the resend loader after a failure and allows a safe retry", async () => {

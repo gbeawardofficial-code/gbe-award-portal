@@ -288,22 +288,34 @@ export default async function PaymentsPage({
                         <p className="mt-1 font-medium">
                           {application.nomineeName}
                         </p>
-                        <p className="mt-1 font-mono text-xs text-muted-foreground">
-                          {payment.paymentReference ?? "Reference pending"}
-                        </p>
+                        {application.recordOrigin === "staff_winner" ? (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Staff entry
+                          </p>
+                        ) : null}
+                        {payment.paymentReference ||
+                        payment.status !== "waived" ? (
+                          <p className="mt-1 font-mono text-xs text-muted-foreground">
+                            {payment.paymentReference ?? "Reference pending"}
+                          </p>
+                        ) : null}
                       </td>
                       <td className="px-4 py-4">
                         <p>
-                          {payment.method === "card"
-                            ? "Card · Genie"
-                            : (payment.payerName ?? "Not recorded")}
+                          {payment.status === "waived"
+                            ? "Fee waived"
+                            : payment.method === "card"
+                              ? "Card · Genie"
+                              : (payment.payerName ?? "Not recorded")}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {payment.gatewayTransactionId ??
-                            payment.bankReference ??
-                            (payment.method === "card"
-                              ? "Awaiting confirmation"
-                              : "No bank reference")}
+                          {payment.status === "waived"
+                            ? "FOC approved"
+                            : (payment.gatewayTransactionId ??
+                              payment.bankReference ??
+                              (payment.method === "card"
+                                ? "Awaiting confirmation"
+                                : "No bank reference"))}
                         </p>
                       </td>
                       <td className="px-4 py-4">
@@ -316,16 +328,20 @@ export default async function PaymentsPage({
                       </td>
                       <td className="px-4 py-4">
                         <p className="max-w-48 truncate">
-                          {payment.gatewayTransactionId
-                            ? "Verified by Genie"
-                            : payment.method === "card"
-                              ? "No slip required"
-                              : (proofName ?? "No current proof")}
+                          {payment.status === "waived"
+                            ? "Not applicable"
+                            : payment.gatewayTransactionId
+                              ? "Verified by Genie"
+                              : payment.method === "card"
+                                ? "No slip required"
+                                : (proofName ?? "No current proof")}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {payment.method === "card"
-                            ? "Secure card payment"
-                            : `${proofVersions} retained version(s)`}
+                          {payment.status === "waived"
+                            ? "Staff-recorded waiver"
+                            : payment.method === "card"
+                              ? "Secure card payment"
+                              : `${proofVersions} retained version(s)`}
                         </p>
                         {proofFileId ? (
                           <ProtectedFilePreview

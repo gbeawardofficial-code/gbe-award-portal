@@ -10,6 +10,10 @@ const countWhere = (condition: SQL) =>
 
 export async function getDashboardApplications(scope?: SQL) {
   const db = getDb();
+  const publicNominations = submittedApplications(
+    scope,
+    eq(applications.recordOrigin, "public_nomination"),
+  );
   const [[counts], recent, unassigned] = await Promise.all([
     db
       .select({
@@ -33,7 +37,7 @@ export async function getDashboardApplications(scope?: SQL) {
         ),
       })
       .from(applications)
-      .where(submittedApplications(scope)),
+      .where(publicNominations),
     db
       .select({
         id: applications.id,
@@ -43,7 +47,7 @@ export async function getDashboardApplications(scope?: SQL) {
         submittedAt: applications.submittedAt,
       })
       .from(applications)
-      .where(submittedApplications(scope))
+      .where(publicNominations)
       .orderBy(desc(applications.submittedAt), desc(applications.id))
       .limit(6),
     db
@@ -56,6 +60,7 @@ export async function getDashboardApplications(scope?: SQL) {
       .where(
         submittedApplications(
           scope,
+          eq(applications.recordOrigin, "public_nomination"),
           isNull(applications.assignedReviewerId),
           inArray(applications.workflowStatus, [...reviewStatuses]),
         ),
